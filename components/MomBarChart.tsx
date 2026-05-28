@@ -21,7 +21,7 @@ const YEAR_COLORS: Record<string, string> = {
 }
 const FALLBACK_COLORS = ['#6366f1','#059669','#d97706','#7c3aed']
 
-type PivotRow = { month: string } & Record<string, number | null>
+type PivotRow = { month: string } & Record<string, number | null | string>
 
 function pivot(data: MonthMetric[], dataKey: keyof MonthMetric) {
   const years = [...new Set(data.map(m => m.yearMonth.slice(0, 4)))].sort()
