@@ -52,7 +52,7 @@ export default async function HomePage({
 
   const [conversion, monthlyMetrics] = await Promise.all([
     getConversionMetrics(startDate, endDate),
-    getMonthlyMetrics('2025-01-01', '2026-12-31'),
+    getMonthlyMetrics('2024-01-01', '2026-12-31'),
   ])
   const rangeLabel = formatRangeLabel(startDate, endDate)
 
