@@ -15,8 +15,8 @@ import type { MonthMetric } from '@/lib/queries/dashboard'
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 const YEAR_COLORS: Record<string, string> = {
   '2023': '#9ca3af',
-  '2024': '#e67e22',
-  '2025': '#1a6fc4',
+  '2024': '#bfbfbf',
+  '2025': '#f2f2f2',
   '2026': '#c0392b',
 }
 const FALLBACK_COLORS = ['#6366f1','#059669','#d97706','#7c3aed']
@@ -97,7 +97,7 @@ export default function MomBarChart({ data, dataKey, unit }: Props) {
             return (
               <Line
                 key={year}
-                type="monotone"
+                type="natural"
                 dataKey={year}
                 name={year}
                 stroke={color}
