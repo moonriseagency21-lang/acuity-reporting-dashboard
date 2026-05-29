@@ -161,13 +161,15 @@ export default async function HomePage({
           totalLabeled={conversion.totalLabeled}
         />
 
-        <Panel title="Label Counts">
-          <LabelCountsPanel
-            labelCounts={conversion.labelCounts}
-            startDate={startDate}
-            endDate={endDate}
-          />
-        </Panel>
+        <div style={{ marginBottom: 24 }}>
+          <Panel title="Label Counts">
+            <LabelCountsPanel
+              labelCounts={conversion.labelCounts}
+              startDate={startDate}
+              endDate={endDate}
+            />
+          </Panel>
+        </div>
 
         <section className="mom-chart-grid">
           <div className="mom-chart-grid-full">

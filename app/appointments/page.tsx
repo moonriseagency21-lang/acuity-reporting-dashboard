@@ -20,19 +20,16 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-// Parses Acuity CSV start_time format: "M/D/YY H:MM"
-function formatDateTime(startTime: string) {
+// appt_date is "YYYY-MM-DD", start_time is "HH:MM:SS" (from Postgres time type)
+function formatDateTime(apptDate: string, startTime: string) {
   try {
-    const [datePart, timePart] = startTime.split(' ')
-    const [m, d, yy] = datePart.split('/')
-    const [h, min] = (timePart ?? '0:0').split(':')
-    const date = new Date(2000 + parseInt(yy), parseInt(m) - 1, parseInt(d), parseInt(h), parseInt(min))
+    const date = new Date(`${apptDate}T${startTime}`)
     return date.toLocaleString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric',
       hour: 'numeric', minute: '2-digit', hour12: true,
     })
   } catch {
-    return startTime
+    return `${apptDate} ${startTime}`
   }
 }
 
@@ -157,7 +154,7 @@ export default async function AppointmentsPage({
                   }}
                 >
                   <td style={{ padding: '8px 14px', whiteSpace: 'nowrap', color: '#374151' }}>
-                    {formatDateTime(appt.start_time)}
+                    {formatDateTime(appt.appt_date, appt.start_time)}
                   </td>
                   <td style={{ padding: '8px 14px', whiteSpace: 'nowrap', fontWeight: 500 }}>
                     {appt.first_name} {appt.last_name}
