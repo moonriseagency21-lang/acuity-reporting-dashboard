@@ -1,6 +1,20 @@
 import Link from 'next/link'
 import { getAppointmentsByLabel } from '@/lib/queries/dashboard'
 
+type Appointment = {
+  appointment_id: number
+  appt_date: string
+  start_time: string
+  first_name: string
+  last_name: string
+  email: string | null
+  calendar: string | null
+  appointment_type: string | null
+  label_name: string | null
+  notes: string | null
+  paid: string | null
+}
+
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
@@ -134,7 +148,7 @@ export default async function AppointmentsPage({
               </tr>
             </thead>
             <tbody>
-              {appointments.map((appt: Record<string, unknown>, i: number) => (
+              {(appointments as Appointment[]).map((appt, i) => (
                 <tr
                   key={appt.appointment_id}
                   style={{
@@ -143,30 +157,30 @@ export default async function AppointmentsPage({
                   }}
                 >
                   <td style={{ padding: '8px 14px', whiteSpace: 'nowrap', color: '#374151' }}>
-                    {formatDateTime(appt.start_time as string)}
+                    {formatDateTime(appt.start_time)}
                   </td>
                   <td style={{ padding: '8px 14px', whiteSpace: 'nowrap', fontWeight: 500 }}>
                     {appt.first_name} {appt.last_name}
                   </td>
                   <td style={{ padding: '8px 14px', color: '#6b7280', fontSize: '12px' }}>
-                    {appt.email as string ?? '—'}
+                    {appt.email ?? '—'}
                   </td>
                   <td style={{ padding: '8px 14px', whiteSpace: 'nowrap', color: '#6b7280' }}>
-                    {appt.calendar as string ?? '—'}
+                    {appt.calendar ?? '—'}
                   </td>
                   <td style={{ padding: '8px 14px', color: '#6b7280' }}>
-                    {appt.appointment_type as string ?? '—'}
+                    {appt.appointment_type ?? '—'}
                   </td>
                   <td style={{ padding: '8px 14px' }}>
-                    <LabelPill label={appt.label_name as string} />
+                    <LabelPill label={appt.label_name} />
                   </td>
                   <td style={{ padding: '8px 14px', maxWidth: '240px', color: '#6b7280', fontSize: '12px' }}>
                     {appt.notes ? (
-                      <span title={appt.notes as string} style={{
+                      <span title={appt.notes} style={{
                         display: '-webkit-box', WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical', overflow: 'hidden',
                       }}>
-                        {appt.notes as string}
+                        {appt.notes}
                       </span>
                     ) : '—'}
                   </td>
