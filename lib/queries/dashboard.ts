@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { unstable_cache } from 'next/cache'
 import { OPPORTUNITY_LABELS, NO_OPPORTUNITY_LABELS, RESCHEDULE_LABELS } from '@/lib/labelBuckets'
 
 const MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -108,7 +109,7 @@ export async function getConversionMetrics(startDate: string, endDate: string) {
   }
 }
 
-export async function getMonthlyMetrics(startDate: string, endDate: string): Promise<MonthMetric[]> {
+async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<MonthMetric[]> {
   const { data, error } = await supabase.rpc('get_monthly_metrics', {
     p_start: startDate,
     p_end: endDate,
@@ -132,7 +133,7 @@ export async function getMonthlyMetrics(startDate: string, endDate: string): Pro
       month: `${MONTH_ABBREVS[parseInt(mo) - 1]} ${yr}`,
       yearMonth: row.year_month,
       total: Number(row.total),
-      booked: Number(row.booked),
+      booked: Number(row.booked ?? 0),
       noShow: Number(row.no_show),
       show: Number(row.show),
       showRate,
@@ -142,6 +143,14 @@ export async function getMonthlyMetrics(startDate: string, endDate: string): Pro
     }
   })
 }
+
+// Cached for 6 hours — monthly metrics only change after the nightly sync.
+// Revalidates automatically on next request after the TTL expires.
+export const getMonthlyMetrics = unstable_cache(
+  _getMonthlyMetrics,
+  ['monthly-metrics'],
+  { revalidate: 6 * 60 * 60 }
+)
 
 export async function getAppointmentsByLabel(
   startDate: string,
