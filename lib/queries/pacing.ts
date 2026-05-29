@@ -130,16 +130,16 @@ export async function getPacingData(): Promise<PacingData> {
   const daysElapsed = now.getDate()
   const daysRemaining = daysInMonth - daysElapsed
 
-  // Historical: appointments this month up to today
-  const { data: historicalData, error: histErr } = await supabase
+  // Historical: count appointments this month up to today (head:true = no rows fetched)
+  const { count: mtdCount, error: histErr } = await supabase
     .from('acuity_appointments_v2')
-    .select('id')
+    .select('id', { count: 'exact', head: true })
     .gte('datetime', monthStart + 'T00:00:00')
     .lte('datetime', todayStr + 'T23:59:59')
     .eq('canceled', false)
 
   if (histErr) throw histErr
-  const mtdApptCount = (historicalData ?? []).length
+  const mtdApptCount = mtdCount ?? 0
 
   // MTD label counts for shows and sales
   const { data: labelData, error: labelErr } = await supabase.rpc('get_label_counts', {
@@ -163,15 +163,15 @@ export async function getPacingData(): Promise<PacingData> {
   const lastDay = new Date(year, month + 1, 0).getDate()
   const endOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
 
-  const { data: futureData, error: futErr } = await supabase
+  const { count: futCount, error: futErr } = await supabase
     .from('future_appointments')
-    .select('id')
+    .select('id', { count: 'exact', head: true })
     .gte('datetime', tomorrowStr + 'T00:00:00')
     .lte('datetime', endOfMonth + 'T23:59:59')
     .eq('canceled', false)
 
   if (futErr) throw futErr
-  const futureApptCount = (futureData ?? []).length
+  const futureApptCount = futCount ?? 0
 
   const totalMonthAppts = mtdApptCount + futureApptCount
   const goalSales = Math.round(totalMonthAppts * OVERALL_SALES_RATE_GOAL)
