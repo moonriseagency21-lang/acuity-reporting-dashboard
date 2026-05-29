@@ -86,7 +86,13 @@ export default async function AppointmentsPage({
   try {
     appointments = await getAppointmentsByLabel(startDate, endDate, label)
   } catch (err) {
-    fetchError = err instanceof Error ? err.message : 'Failed to load appointments.'
+    if (err && typeof err === 'object' && 'message' in err) {
+      fetchError = String((err as { message: unknown }).message)
+    } else if (err instanceof Error) {
+      fetchError = err.message
+    } else {
+      fetchError = JSON.stringify(err)
+    }
   }
   const rangeLabel = formatRangeLabel(startDate, endDate)
   const isSale = label.startsWith('$ale')
