@@ -1,4 +1,4 @@
-import { getServiceClient } from '@/lib/supabase-server'
+import { supabase } from '@/lib/supabase'
 import { OPPORTUNITY_LABELS } from '@/lib/labelBuckets'
 import { OVERALL_SALES_RATE_GOAL, SHOW_RATE_GOAL, CLOSE_RATE_GOAL } from '@/lib/goals'
 
@@ -54,7 +54,7 @@ export async function getFutureAppointments(): Promise<FutureAppointment[]> {
   const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
   const endOfMonth = `${todayStr.slice(0, 7)}-${String(lastDay).padStart(2, '0')}`
 
-  const { data, error } = await getServiceClient()
+  const { data, error } = await supabase
     .from('future_appointments')
     .select('id, datetime, first_name, last_name, calendar, appointment_type, labels, canceled')
     .gte('datetime', todayStr + 'T00:00:00')
@@ -71,7 +71,7 @@ export async function getTodayAppointments(): Promise<TodayAppointment[]> {
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
 
-  const { data, error } = await getServiceClient()
+  const { data, error } = await supabase
     .from('vw_v2_labels')
     .select('appointment_id, datetime, first_name, last_name, calendar, appointment_type, label_name, canceled, no_show')
     .gte('appt_date', todayStr)
@@ -107,7 +107,7 @@ export async function getTodayFutureAppointments(): Promise<FutureAppointment[]>
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
 
-  const { data, error } = await getServiceClient()
+  const { data, error } = await supabase
     .from('future_appointments')
     .select('id, datetime, first_name, last_name, calendar, appointment_type, labels, canceled')
     .gte('datetime', todayStr + 'T00:00:00')
@@ -131,7 +131,7 @@ export async function getPacingData(): Promise<PacingData> {
   const daysRemaining = daysInMonth - daysElapsed
 
   // Historical: count appointments this month up to today (head:true = no rows fetched)
-  const { count: mtdCount, error: histErr } = await getServiceClient()
+  const { count: mtdCount, error: histErr } = await supabase
     .from('acuity_appointments_v2')
     .select('id', { count: 'exact', head: true })
     .gte('datetime', monthStart + 'T00:00:00')
@@ -142,7 +142,7 @@ export async function getPacingData(): Promise<PacingData> {
   const mtdApptCount = mtdCount ?? 0
 
   // MTD label counts for shows and sales
-  const { data: labelData, error: labelErr } = await getServiceClient().rpc('get_label_counts', {
+  const { data: labelData, error: labelErr } = await supabase.rpc('get_label_counts', {
     p_start: monthStart,
     p_end: todayStr,
   })
@@ -163,7 +163,7 @@ export async function getPacingData(): Promise<PacingData> {
   const lastDay = new Date(year, month + 1, 0).getDate()
   const endOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
 
-  const { count: futCount, error: futErr } = await getServiceClient()
+  const { count: futCount, error: futErr } = await supabase
     .from('future_appointments')
     .select('id', { count: 'exact', head: true })
     .gte('datetime', tomorrowStr + 'T00:00:00')

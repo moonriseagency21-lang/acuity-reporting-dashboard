@@ -1,4 +1,4 @@
-import { getServiceClient } from '@/lib/supabase-server'
+import { supabase } from '@/lib/supabase'
 import { OPPORTUNITY_LABELS, NO_OPPORTUNITY_LABELS, RESCHEDULE_LABELS } from '@/lib/labelBuckets'
 
 const MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -19,7 +19,7 @@ export async function getLabelCounts(
   startDate: string,
   endDate: string
 ): Promise<Record<string, number>> {
-  const { data, error } = await getServiceClient().rpc('get_label_counts', {
+  const { data, error } = await supabase.rpc('get_label_counts', {
     p_start: startDate,
     p_end: endDate,
   })
@@ -108,7 +108,7 @@ export async function getConversionMetrics(startDate: string, endDate: string) {
 }
 
 export async function getMonthlyMetrics(startDate: string, endDate: string): Promise<MonthMetric[]> {
-  const { data, error } = await getServiceClient().rpc('get_monthly_metrics', {
+  const { data, error } = await supabase.rpc('get_monthly_metrics', {
     p_start: startDate,
     p_end: endDate,
   })
@@ -145,7 +145,7 @@ export async function getAppointmentsByLabel(
   endDate: string,
   labelName: string
 ) {
-  const { data, error } = await getServiceClient()
+  const { data, error } = await supabase
     .from('vw_v2_labels')
     .select('appointment_id, appt_date, start_time, first_name, last_name, email, calendar, appointment_type, label_name, notes, paid')
     .gte('appt_date', startDate)
