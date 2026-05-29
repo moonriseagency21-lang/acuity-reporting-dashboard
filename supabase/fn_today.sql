@@ -3,6 +3,10 @@
 -- table access via the PostgREST API layer.
 -- Run in Supabase SQL Editor.
 
+-- B-tree index on raw datetime text for range-based pre-filtering
+CREATE INDEX IF NOT EXISTS idx_acuity_v2_datetime_text
+  ON acuity_appointments_v2(datetime);
+
 -- ── Today's historical appointments (from acuity_appointments_v2) ─────────────
 CREATE OR REPLACE FUNCTION get_today_appointments(p_date date)
 RETURNS TABLE(
@@ -48,7 +52,9 @@ AS $$
     ) AS label_name,
     a.canceled::boolean
   FROM acuity_appointments_v2 a
-  WHERE (a.datetime::timestamptz AT TIME ZONE 'America/New_York')::date = p_date
+  WHERE a.datetime >= p_date::text              -- index-friendly string prefix (UTC date ≥ Eastern date)
+    AND a.datetime <  (p_date + 2)::text        -- +2 day buffer covers UTC offset for Eastern time
+    AND (a.datetime::timestamptz AT TIME ZONE 'America/New_York')::date = p_date  -- precise filter
   ORDER BY a.datetime;
 $$;
 
