@@ -110,15 +110,28 @@ export async function getConversionMetrics(startDate: string, endDate: string) {
 }
 
 async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<MonthMetric[]> {
-  const { data, error } = await supabase.rpc('get_monthly_metrics', {
-    p_start: startDate,
-    p_end: endDate,
-  })
-  if (error) throw error
-  return (data as Array<{
+  // Fetch label-based metrics and booked counts in parallel.
+  // vw_monthly_booked is a simple group-by on the base table — fast and index-backed.
+  const [metricsRes, bookedRes] = await Promise.all([
+    supabase.rpc('get_monthly_metrics', { p_start: startDate, p_end: endDate }),
+    supabase
+      .from('vw_monthly_booked')
+      .select('year_month, booked')
+      .gte('year_month', startDate.slice(0, 7))
+      .lte('year_month', endDate.slice(0, 7)),
+  ])
+
+  if (metricsRes.error) throw metricsRes.error
+
+  // Build a lookup map from the view
+  const bookedMap = new Map<string, number>()
+  for (const row of (bookedRes.data ?? []) as Array<{ year_month: string; booked: number }>) {
+    bookedMap.set(row.year_month, Number(row.booked))
+  }
+
+  return (metricsRes.data as Array<{
     year_month: string
     total: number
-    booked: number
     no_show: number
     show: number
     opportunity: number
@@ -133,7 +146,7 @@ async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<M
       month: `${MONTH_ABBREVS[parseInt(mo) - 1]} ${yr}`,
       yearMonth: row.year_month,
       total: Number(row.total),
-      booked: Number(row.booked ?? 0),
+      booked: bookedMap.get(row.year_month) ?? 0,
       noShow: Number(row.no_show),
       show: Number(row.show),
       showRate,
@@ -145,7 +158,6 @@ async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<M
 }
 
 // Cached for 6 hours — monthly metrics only change after the nightly sync.
-// Revalidates automatically on next request after the TTL expires.
 export const getMonthlyMetrics = unstable_cache(
   _getMonthlyMetrics,
   ['monthly-metrics'],
