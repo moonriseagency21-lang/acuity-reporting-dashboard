@@ -40,7 +40,10 @@ AS $$
     notes::text,
     paid::text
   FROM acuity_appointments_v2
-  WHERE (datetime::timestamptz AT TIME ZONE 'America/New_York')::date BETWEEN p_start AND p_end
+  WHERE
+    -- Use the raw datetime index by converting boundaries to timestamptz
+    datetime::timestamptz >= (p_start::text || 'T00:00:00')::timestamptz AT TIME ZONE 'America/New_York'
+    AND datetime::timestamptz <  ((p_end + 1)::text || 'T00:00:00')::timestamptz AT TIME ZONE 'America/New_York'
     AND (
       CASE
         WHEN p_label = '(blank)' THEN
@@ -48,12 +51,10 @@ AS $$
           OR labels = '[]'::jsonb
           OR jsonb_array_length(labels) = 0
         ELSE
-          -- Handle both object format {"name": "..."} and plain string format
           labels @> jsonb_build_array(jsonb_build_object('name', p_label))
           OR labels @> jsonb_build_array(to_jsonb(p_label))
       END
     )
-  ORDER BY (datetime::timestamptz AT TIME ZONE 'America/New_York')::date,
-           datetime
+  ORDER BY datetime
   LIMIT 5000;
 $$;
