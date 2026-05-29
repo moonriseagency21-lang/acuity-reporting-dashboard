@@ -111,11 +111,11 @@ export async function getConversionMetrics(startDate: string, endDate: string) {
 
 async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<MonthMetric[]> {
   // Fetch label-based metrics and booked counts in parallel.
-  // vw_monthly_booked is a simple group-by on the base table — fast and index-backed.
+  // vw_monthly_total_appointments is a simple group-by on the base table — fast and index-backed.
   const [metricsRes, bookedRes] = await Promise.all([
     supabase.rpc('get_monthly_metrics', { p_start: startDate, p_end: endDate }),
     supabase
-      .from('vw_monthly_booked')
+      .from('vw_monthly_total_appointments')
       .select('year_month, booked')
       .gte('year_month', startDate.slice(0, 7))
       .lte('year_month', endDate.slice(0, 7)),
