@@ -1,24 +1,30 @@
--- Nightly Acuity sync — runs at 5:00 AM UTC (midnight US Eastern, covers both EST and EDT).
--- Paste this into the Supabase SQL editor (not the cron UI).
--- Replace YOUR_SERVICE_ROLE_KEY with the key from Settings > API > service_role.
+-- Nightly Acuity sync using acuity-sync-v2 (writes to acuity_appointments_v2).
+-- Runs at 7:00 AM UTC = 3:00 AM Eastern (covers both EST and EDT).
+--
+-- Run in Supabase SQL Editor. Replace YOUR_SERVICE_ROLE_KEY with your key
+-- from Settings > API > Secret keys.
 
+-- Remove old job if it exists
+select cron.unschedule('acuity-nightly-sync');
+
+-- Create updated job pointing at acuity-sync-v2
 select cron.schedule(
   'acuity-nightly-sync',
-  '0 5 * * *',
+  '0 7 * * *',
   $$
   select net.http_post(
-    url    := 'https://ewgookyitoxxphfjfkcm.supabase.co/functions/v1/acuity-sync',
+    url     := 'https://ewgookyitoxxphfjfkcm.supabase.co/functions/v1/acuity-sync-v2',
     headers := jsonb_build_object(
       'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY',
       'Content-Type',  'application/json'
     ),
-    body   := '{"mode": "daily"}'::jsonb
+    body    := '{"mode": "daily"}'::jsonb
   );
   $$
 );
 
--- To verify the job was created:
+-- Verify:
 -- select * from cron.job;
 
--- To remove it later:
+-- To remove later:
 -- select cron.unschedule('acuity-nightly-sync');
