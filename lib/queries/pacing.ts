@@ -20,6 +20,7 @@ export type TodayAppointment = {
   datetime: string
   first_name: string | null
   last_name: string | null
+  email: string | null
   calendar: string | null
   appointment_type: string | null
   label_name: string | null
@@ -78,6 +79,7 @@ export async function getTodayAppointments(): Promise<TodayAppointment[]> {
     datetime: string
     first_name: string | null
     last_name: string | null
+    email: string | null
     calendar: string | null
     appointment_type: string | null
     label_name: string | null
@@ -87,6 +89,7 @@ export async function getTodayAppointments(): Promise<TodayAppointment[]> {
     datetime: row.datetime,
     first_name: row.first_name,
     last_name: row.last_name,
+    email: row.email,
     calendar: row.calendar,
     appointment_type: row.appointment_type,
     label_name: row.label_name,

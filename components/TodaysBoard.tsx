@@ -168,6 +168,9 @@ export default function TodaysBoard({ initialHistorical, initialFuture }: Props)
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#111110' }}>
                   {[appt.first_name, appt.last_name].filter(Boolean).join(' ') || '—'}
                 </div>
+                {appt.email && (
+                  <div style={{ fontSize: 11, color: '#6b7280' }}>{appt.email}</div>
+                )}
                 {appt.appointment_type && (
                   <div style={{ fontSize: 11, color: '#9ca3af' }}>{appt.appointment_type}</div>
                 )}

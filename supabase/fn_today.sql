@@ -14,6 +14,7 @@ RETURNS TABLE(
   datetime         text,
   first_name       text,
   last_name        text,
+  email            text,
   calendar         text,
   appointment_type text,
   label_name       text,
@@ -26,6 +27,7 @@ AS $$
     a.datetime::text,
     a.first_name::text,
     a.last_name::text,
+    a.email::text,
     a.calendar::text,
     a.appointment_type::text,
     COALESCE(
