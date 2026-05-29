@@ -2,14 +2,11 @@ export const dynamic = 'force-dynamic'
 
 import KpiCard from '@/components/KpiCard'
 import Panel from '@/components/Panel'
-import BucketBarChart from '@/components/BucketBarChart'
 import LabelCountsPanel from '@/components/LabelCountsPanel'
 import DateRangePicker from '@/components/DateRangePicker'
 import MomBarChart from '@/components/MomBarChart'
 import GoalMetricsPanel from '@/components/GoalMetricsPanel'
-import PacingPanel from '@/components/PacingPanel'
 import { getConversionMetrics, getMonthlyMetrics } from '@/lib/queries/dashboard'
-import { getPacingData } from '@/lib/queries/pacing'
 import { logout } from '@/app/login/actions'
 import Link from 'next/link'
 
@@ -63,14 +60,14 @@ export default async function HomePage({
     overallRate: null, closeRate: null,
   }
 
-  const [conversion, monthlyMetrics, pacing] = await Promise.all([
+  const [conversion, monthlyMetrics] = await Promise.all([
     getConversionMetrics(startDate, endDate).catch(() => emptyConversion),
     getMonthlyMetrics('2024-01-01', '2026-12-31').catch(() => [] as Awaited<ReturnType<typeof getMonthlyMetrics>>),
-    getPacingData().catch(() => null),
   ])
 
-  const now = new Date()
-  const currentMonthLabel = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`
+  // Sales needed = goal (30% of shows) minus actual sales, floor 0
+  const salesNeeded = Math.max(0, Math.round(conversion.opportunityCount * 0.3) - conversion.saleCount)
+
   const rangeLabel = formatRangeLabel(startDate, endDate)
 
   return (
@@ -124,29 +121,24 @@ export default async function HomePage({
           </div>
         </header>
 
-        <section className="kpi-grid kpi-grid-6">
+        <section className="kpi-grid kpi-grid-5">
           <KpiCard
-            title="Opportunity"
+            title="Opportunity / Show"
             value={conversion.opportunityCount.toLocaleString()}
             rate={conversion.opportunityRate ?? undefined}
             subtitle="Spoke with customer"
           />
           <KpiCard
-            title="Sales ($ale)"
-            value={conversion.saleCount !== null ? conversion.saleCount.toLocaleString() : '—'}
-            subtitle="Confirmed purchases"
+            title="No Opportunity"
+            value={conversion.noOpportunityCount.toLocaleString()}
+            rate={conversion.noOpportunityRate ?? undefined}
+            subtitle="No opp ÷ all appts"
           />
           <KpiCard
-            title="No Show Rate"
+            title="No Show"
             value={conversion.noShowCount.toLocaleString()}
             rate={conversion.noShowRate ?? undefined}
             subtitle="No SHOW ÷ all appts"
-          />
-          <KpiCard
-            title="Show Rate"
-            value={conversion.opportunityCount.toLocaleString()}
-            rate={conversion.opportunityRate ?? undefined}
-            subtitle="Showed ÷ all appts"
           />
           <KpiCard
             title="Overall Conv. Rate"
@@ -155,13 +147,11 @@ export default async function HomePage({
           />
           <KpiCard
             title="Sales Needed"
-            value={pacing ? pacing.salesNeeded.toLocaleString() : '—'}
-            subtitle={pacing ? `to hit goal (${pacing.goalSales} total)` : 'to hit monthly goal'}
-            highlight={pacing ? (pacing.salesNeeded === 0 ? 'green' : pacing.onTrack ? undefined : 'red') : undefined}
+            value={salesNeeded.toLocaleString()}
+            subtitle={`to hit goal (${Math.round(conversion.opportunityCount * 0.3).toLocaleString()} total)`}
+            highlight={salesNeeded === 0 ? 'green' : 'red'}
           />
         </section>
-
-        {pacing && <PacingPanel initial={pacing} monthLabel={currentMonthLabel} />}
 
         <GoalMetricsPanel
           opportunityRate={conversion.opportunityRate ?? null}
@@ -171,18 +161,13 @@ export default async function HomePage({
           totalLabeled={conversion.totalLabeled}
         />
 
-        <section className="panel-grid panel-grid-two">
-          <Panel title={`${rangeLabel} Bucket Distribution`}>
-            <BucketBarChart data={conversion.buckets} />
-          </Panel>
-          <Panel title="Label Counts">
-            <LabelCountsPanel
-              labelCounts={conversion.labelCounts}
-              startDate={startDate}
-              endDate={endDate}
-            />
-          </Panel>
-        </section>
+        <Panel title="Label Counts">
+          <LabelCountsPanel
+            labelCounts={conversion.labelCounts}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </Panel>
 
         <section className="mom-chart-grid">
           <Panel title="No Shows — Month over Month">

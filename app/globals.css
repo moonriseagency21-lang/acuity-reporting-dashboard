@@ -67,6 +67,10 @@ body {
   margin-bottom: 24px;
 }
 
+.kpi-grid-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .kpi-grid-6 {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }

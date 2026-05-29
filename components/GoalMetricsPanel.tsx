@@ -134,7 +134,7 @@ export default function GoalMetricsPanel({
     {
       category: 'Show',
       groups: [
-        rateGroup('Rate', opportunityRate),
+        rateGroup('of Appointments', opportunityRate),
         {
           label: 'Count',
           goal: opportunityCountGoal.toLocaleString(),
@@ -145,9 +145,9 @@ export default function GoalMetricsPanel({
       ],
     },
     {
-      category: 'Sales Bucket',
+      category: 'Sales',
       groups: [
-        rateGroup('Close Rate', closeRate),
+        rateGroup('of Shows', closeRate),
         {
           label: 'Count',
           goal: salesCountGoal.toLocaleString(),

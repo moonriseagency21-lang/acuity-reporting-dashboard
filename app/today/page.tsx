@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic'
 
 import TodaysBoard from '@/components/TodaysBoard'
-import { getTodayAppointments, getTodayFutureAppointments } from '@/lib/queries/pacing'
+import PacingPanel from '@/components/PacingPanel'
+import { getTodayAppointments, getTodayFutureAppointments, getPacingData } from '@/lib/queries/pacing'
 import { logout } from '@/app/login/actions'
 import Link from 'next/link'
 
@@ -16,10 +17,14 @@ function todayLabel() {
 }
 
 export default async function TodayPage() {
-  const [historical, future] = await Promise.all([
+  const [historical, future, pacing] = await Promise.all([
     getTodayAppointments().catch(() => []),
     getTodayFutureAppointments().catch(() => []),
+    getPacingData().catch(() => null),
   ])
+  const now = new Date()
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const currentMonthLabel = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`
 
   return (
     <main className="dashboard-page">
@@ -71,6 +76,7 @@ export default async function TodayPage() {
           </div>
         </header>
 
+        {pacing && <PacingPanel initial={pacing} monthLabel={currentMonthLabel} />}
         <TodaysBoard initialHistorical={historical} initialFuture={future} />
 
       </div>
