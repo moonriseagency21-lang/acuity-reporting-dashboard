@@ -41,9 +41,10 @@ AS $$
     paid::text
   FROM acuity_appointments_v2
   WHERE
-    -- Convert date boundaries to timestamptz so the datetime index can be used
-    datetime::timestamptz >= p_start::timestamp AT TIME ZONE 'America/New_York'
-    AND datetime::timestamptz <  (p_end::timestamp + interval '1 day') AT TIME ZONE 'America/New_York'
+    -- Text prefix comparison uses the existing btree index on datetime (text)
+    -- ISO format sorts correctly as text, so this is accurate for date filtering
+    datetime >= p_start::text
+    AND datetime <  (p_end + 1)::text
     AND (
       CASE
         WHEN p_label = '(blank)' THEN
