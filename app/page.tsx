@@ -170,31 +170,33 @@ export default async function HomePage({
         </Panel>
 
         <section className="mom-chart-grid">
-          <Panel title="No Shows — Month over Month">
-            <MomBarChart data={monthlyMetrics} dataKey="noShow" />
-          </Panel>
-          <Panel title="Shows — Month over Month">
-            <MomBarChart data={monthlyMetrics} dataKey="show" />
-          </Panel>
-          <Panel title="Show Rate — Month over Month">
-            <MomBarChart data={monthlyMetrics} dataKey="showRate" unit="%" />
-          </Panel>
-          <Panel title="Opportunity — Month over Month">
-            <MomBarChart data={monthlyMetrics} dataKey="opportunity" />
-          </Panel>
-          <Panel title="No Opportunity — Month over Month">
-            <MomBarChart data={monthlyMetrics} dataKey="noOpportunity" />
-          </Panel>
           <div className="mom-chart-grid-full">
-            <Panel title="$ale (all sale labels) — Month over Month">
+            <Panel title="Total Appointments Booked">
+              <MomBarChart data={monthlyMetrics} dataKey="booked" />
+            </Panel>
+          </div>
+          <div className="mom-chart-grid-full">
+            <Panel title="$ale (all sale labels)">
               <MomBarChart data={monthlyMetrics} dataKey="sale" />
             </Panel>
           </div>
           <div className="mom-chart-grid-full">
-            <Panel title="Total Appointments Booked — Month over Month">
-              <MomBarChart data={monthlyMetrics} dataKey="booked" />
+            <Panel title="Show Rate">
+              <MomBarChart data={monthlyMetrics} dataKey="showRate" unit="%" />
             </Panel>
           </div>
+          <Panel title="Opportunity">
+            <MomBarChart data={monthlyMetrics} dataKey="opportunity" />
+          </Panel>
+          <Panel title="No Opportunity">
+            <MomBarChart data={monthlyMetrics} dataKey="noOpportunity" />
+          </Panel>
+          <Panel title="Shows">
+            <MomBarChart data={monthlyMetrics} dataKey="show" />
+          </Panel>
+          <Panel title="No Shows">
+            <MomBarChart data={monthlyMetrics} dataKey="noShow" />
+          </Panel>
         </section>
 
       </div>
