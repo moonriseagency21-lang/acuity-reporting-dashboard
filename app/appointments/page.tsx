@@ -70,7 +70,13 @@ export default async function AppointmentsPage({
   const endDate = params.endDate ?? `${y}-${m}-${String(lastDay).padStart(2, '0')}`
   const label = params.label ?? '(blank)'
 
-  const appointments = await getAppointmentsByLabel(startDate, endDate, label)
+  let appointments: Awaited<ReturnType<typeof getAppointmentsByLabel>> = []
+  let fetchError: string | null = null
+  try {
+    appointments = await getAppointmentsByLabel(startDate, endDate, label)
+  } catch (err) {
+    fetchError = err instanceof Error ? err.message : 'Failed to load appointments.'
+  }
   const rangeLabel = formatRangeLabel(startDate, endDate)
   const isSale = label.startsWith('$ale')
 
@@ -102,7 +108,9 @@ export default async function AppointmentsPage({
         </p>
       </div>
 
-      {appointments.length === 0 ? (
+      {fetchError ? (
+        <p style={{ color: '#dc2626' }}>Error loading appointments: {fetchError}</p>
+      ) : appointments.length === 0 ? (
         <p style={{ color: '#9ca3af' }}>No appointments found.</p>
       ) : (
         <div style={{ overflowX: 'auto' }}>

@@ -171,14 +171,11 @@ export async function getAppointmentsByLabel(
   endDate: string,
   labelName: string
 ) {
-  const { data, error } = await supabase
-    .from('vw_v2_labels')
-    .select('appointment_id, appt_date, start_time, first_name, last_name, email, calendar, appointment_type, label_name, notes, paid')
-    .gte('appt_date', startDate)
-    .lte('appt_date', endDate)
-    .eq('label_name', labelName)
-    .order('appt_date', { ascending: true })
-    .limit(5000)
+  const { data, error } = await supabase.rpc('get_appointments_by_label', {
+    p_start: startDate,
+    p_end: endDate,
+    p_label: labelName,
+  })
 
   if (error) throw error
   return data ?? []
