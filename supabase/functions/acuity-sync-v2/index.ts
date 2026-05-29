@@ -242,6 +242,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
+    // Refresh pre-aggregated monthly metrics after any write mode
+    if ((mode === "daily" || mode === "backfill") && !dryRun) {
+      const { error: refreshErr } = await supabase.rpc("refresh_monthly_metrics");
+      if (refreshErr) console.error("mv refresh failed:", refreshErr.message);
+    }
+
     return Response.json({ ok: true, mode, dryRun, results });
   } catch (err) {
     console.error(err);
