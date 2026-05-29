@@ -55,8 +55,16 @@ export default async function HomePage({
   const startDate = params.startDate ?? defaults.startDate
   const endDate = params.endDate ?? defaults.endDate
 
+  const emptyConversion: Awaited<ReturnType<typeof getConversionMetrics>> = {
+    labelCounts: {}, buckets: [], opportunityCount: 0, noOpportunityCount: 0,
+    rescheduleCount: 0, blankCount: 0, unknownCount: 0, totalLabeled: 0,
+    saleCount: 0, noShowCount: 0, showCount: 0, showRate: null,
+    opportunityRate: null, noOpportunityRate: null, noShowRate: null,
+    overallRate: null, closeRate: null,
+  }
+
   const [conversion, monthlyMetrics, pacing] = await Promise.all([
-    getConversionMetrics(startDate, endDate),
+    getConversionMetrics(startDate, endDate).catch(() => emptyConversion),
     getMonthlyMetrics('2024-01-01', '2026-12-31').catch(() => [] as Awaited<ReturnType<typeof getMonthlyMetrics>>),
     getPacingData().catch(() => null),
   ])
