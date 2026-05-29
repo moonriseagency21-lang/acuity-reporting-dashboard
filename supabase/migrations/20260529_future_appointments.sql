@@ -20,13 +20,5 @@ create table if not exists future_appointments (
 
 create index if not exists future_appointments_datetime_idx on future_appointments (datetime);
 
--- Row-level security: authenticated users can read; service role writes.
-alter table future_appointments enable row level security;
-
-create policy "authenticated can read future_appointments"
-  on future_appointments for select
-  to authenticated
-  using (true);
-
 -- Enable Realtime so the dashboard receives live inserts/updates.
 alter publication supabase_realtime add table future_appointments;
