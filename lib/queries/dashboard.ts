@@ -17,6 +17,7 @@ export type MonthMetric = {
   opportunity: number
   noOpportunity: number
   sale: number
+  cancel: number
 }
 
 export async function getLabelCounts(
@@ -139,6 +140,7 @@ async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<M
     opportunity: number
     no_opportunity: number
     sale: number
+    cancel: number
   }>).map(row => {
     const [yr, mo] = row.year_month.split('-')
     const showRate = row.total > 0
@@ -155,6 +157,7 @@ async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<M
       opportunity: Number(row.opportunity),
       noOpportunity: Number(row.no_opportunity),
       sale: Number(row.sale),
+      cancel: Number(row.cancel ?? 0),
     }
   })
 }

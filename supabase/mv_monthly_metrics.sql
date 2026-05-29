@@ -18,7 +18,8 @@ WITH per_appt AS (
       'Incomplete', 'Left Message', 'No SHOW', 'No VM - No LM',
       'Not confirmed', 'Z_Test_Data'
     )) AS is_no_opportunity,
-    bool_or(label_name LIKE '$ale%') AS is_sale
+    bool_or(label_name LIKE '$ale%') AS is_sale,
+    bool_or(label_name = 'Cancel' OR canceled = true) AS is_cancel
   FROM vw_v2_labels
   GROUP BY appointment_id, appt_date
 )
@@ -29,7 +30,8 @@ SELECT
   count(*) FILTER (WHERE NOT is_no_show)::bigint       AS show,
   count(*) FILTER (WHERE is_opportunity)::bigint       AS opportunity,
   count(*) FILTER (WHERE is_no_opportunity)::bigint    AS no_opportunity,
-  count(*) FILTER (WHERE is_sale)::bigint              AS sale
+  count(*) FILTER (WHERE is_sale)::bigint              AS sale,
+  count(*) FILTER (WHERE is_cancel)::bigint            AS cancel
 FROM per_appt
 GROUP BY to_char(appt_date, 'YYYY-MM')
 ORDER BY year_month;
@@ -52,11 +54,12 @@ RETURNS TABLE(
   show           bigint,
   opportunity    bigint,
   no_opportunity bigint,
-  sale           bigint
+  sale           bigint,
+  cancel         bigint
 )
 LANGUAGE sql STABLE SECURITY DEFINER
 AS $$
-  SELECT year_month, total, no_show, show, opportunity, no_opportunity, sale
+  SELECT year_month, total, no_show, show, opportunity, no_opportunity, sale, cancel
   FROM mv_monthly_metrics
   WHERE year_month BETWEEN to_char(p_start, 'YYYY-MM') AND to_char(p_end, 'YYYY-MM')
   ORDER BY year_month;

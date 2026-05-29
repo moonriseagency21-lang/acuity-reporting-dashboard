@@ -199,6 +199,11 @@ export default async function HomePage({
           <Panel title="No Shows">
             <MomBarChart data={monthlyMetrics} dataKey="noShow" />
           </Panel>
+          <div className="mom-chart-grid-full">
+            <Panel title="Cancels">
+              <MomBarChart data={monthlyMetrics} dataKey="cancel" />
+            </Panel>
+          </div>
         </section>
 
       </div>
