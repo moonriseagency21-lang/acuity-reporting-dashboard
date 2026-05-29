@@ -116,7 +116,7 @@ async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<M
     supabase.rpc('get_monthly_metrics', { p_start: startDate, p_end: endDate }),
     supabase
       .from('vw_monthly_total_appointments')
-      .select('year_month, booked')
+      .select('year_month, booked_including_canceled')
       .gte('year_month', startDate.slice(0, 7))
       .lte('year_month', endDate.slice(0, 7)),
   ])
@@ -125,8 +125,8 @@ async function _getMonthlyMetrics(startDate: string, endDate: string): Promise<M
 
   // Build a lookup map from the view
   const bookedMap = new Map<string, number>()
-  for (const row of (bookedRes.data ?? []) as Array<{ year_month: string; booked: number }>) {
-    bookedMap.set(row.year_month, Number(row.booked))
+  for (const row of (bookedRes.data ?? []) as Array<{ year_month: string; booked_including_canceled: number }>) {
+    bookedMap.set(row.year_month, Number(row.booked_including_canceled))
   }
 
   return (metricsRes.data as Array<{
