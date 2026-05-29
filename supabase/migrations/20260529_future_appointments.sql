@@ -20,5 +20,8 @@ create table if not exists future_appointments (
 
 create index if not exists future_appointments_datetime_idx on future_appointments (datetime);
 
+-- RLS: anon key cannot read directly; server-side queries use service role (bypasses RLS).
+alter table future_appointments enable row level security;
+
 -- Enable Realtime so the dashboard receives live inserts/updates.
 alter publication supabase_realtime add table future_appointments;

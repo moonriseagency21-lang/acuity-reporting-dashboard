@@ -3,14 +3,17 @@ type KpiCardProps = {
   value: string | number
   subtitle?: string
   rate?: string
+  highlight?: 'green' | 'red'
 }
 
-export default function KpiCard({ title, value, subtitle, rate }: KpiCardProps) {
+export default function KpiCard({ title, value, subtitle, rate, highlight }: KpiCardProps) {
+  const borderColor = highlight === 'green' ? '#00C9A7' : highlight === 'red' ? '#ef4444' : '#e0e0e0'
+  const valueColor = highlight === 'green' ? '#15803d' : highlight === 'red' ? '#dc2626' : '#333333'
   return (
     <div
       style={{
         background: '#ffffff',
-        border: '1px solid #e0e0e0',
+        border: `1px solid ${borderColor}`,
         borderRadius: '18px',
         padding: '24px',
       }}
@@ -30,7 +33,7 @@ export default function KpiCard({ title, value, subtitle, rate }: KpiCardProps) 
 
       <div
         style={{
-          color: '#333333',
+          color: valueColor,
           fontSize: '36px',
           fontWeight: 900,
           lineHeight: 1,

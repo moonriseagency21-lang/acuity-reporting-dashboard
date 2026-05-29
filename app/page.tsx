@@ -116,18 +116,12 @@ export default async function HomePage({
           </div>
         </header>
 
-        <section className="kpi-grid kpi-grid-7">
+        <section className="kpi-grid kpi-grid-6">
           <KpiCard
             title="Opportunity"
             value={conversion.opportunityCount.toLocaleString()}
             rate={conversion.opportunityRate ?? undefined}
             subtitle="Spoke with customer"
-          />
-          <KpiCard
-            title="No Opportunity"
-            value={conversion.noOpportunityCount.toLocaleString()}
-            rate={conversion.noOpportunityRate ?? undefined}
-            subtitle="No chance to present"
           />
           <KpiCard
             title="Sales ($ale)"
@@ -152,9 +146,10 @@ export default async function HomePage({
             subtitle={`Sales ÷ all ${conversion.totalLabeled.toLocaleString()} appts`}
           />
           <KpiCard
-            title="Close Rate"
-            value={conversion.closeRate !== null ? `${conversion.closeRate}%` : '—'}
-            subtitle={`Sales ÷ ${conversion.opportunityCount.toLocaleString()} opportunity`}
+            title="Sales Needed"
+            value={pacing ? pacing.salesNeeded.toLocaleString() : '—'}
+            subtitle={pacing ? `to hit goal (${pacing.goalSales} total)` : 'to hit monthly goal'}
+            highlight={pacing ? (pacing.salesNeeded === 0 ? 'green' : pacing.onTrack ? undefined : 'red') : undefined}
           />
         </section>
 
