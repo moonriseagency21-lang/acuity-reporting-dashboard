@@ -42,8 +42,8 @@ AS $$
   FROM acuity_appointments_v2
   WHERE
     -- Convert date boundaries to timestamptz so the datetime index can be used
-    datetime >= p_start::timestamp AT TIME ZONE 'America/New_York'
-    AND datetime <  (p_end::timestamp + interval '1 day') AT TIME ZONE 'America/New_York'
+    datetime::timestamptz >= p_start::timestamp AT TIME ZONE 'America/New_York'
+    AND datetime::timestamptz <  (p_end::timestamp + interval '1 day') AT TIME ZONE 'America/New_York'
     AND (
       CASE
         WHEN p_label = '(blank)' THEN
