@@ -197,6 +197,11 @@ export default async function HomePage({
               <MomBarChart data={monthlyMetrics} dataKey="sale" />
             </Panel>
           </div>
+          <div className="mom-chart-grid-full">
+            <Panel title="Total Appointments Booked — Month over Month">
+              <MomBarChart data={monthlyMetrics} dataKey="booked" />
+            </Panel>
+          </div>
         </section>
 
       </div>

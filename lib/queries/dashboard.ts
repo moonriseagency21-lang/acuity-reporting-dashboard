@@ -7,6 +7,7 @@ export type MonthMetric = {
   month: string
   yearMonth: string
   total: number
+  booked: number
   noShow: number
   show: number
   showRate: number
@@ -116,6 +117,7 @@ export async function getMonthlyMetrics(startDate: string, endDate: string): Pro
   return (data as Array<{
     year_month: string
     total: number
+    booked: number
     no_show: number
     show: number
     opportunity: number
@@ -130,6 +132,7 @@ export async function getMonthlyMetrics(startDate: string, endDate: string): Pro
       month: `${MONTH_ABBREVS[parseInt(mo) - 1]} ${yr}`,
       yearMonth: row.year_month,
       total: Number(row.total),
+      booked: Number(row.booked),
       noShow: Number(row.no_show),
       show: Number(row.show),
       showRate,
