@@ -1,4 +1,5 @@
 import { login } from './actions'
+import LoginButton from '@/components/LoginButton'
 
 export default async function LoginPage({
   searchParams,
@@ -90,23 +91,7 @@ export default async function LoginPage({
             />
           </div>
 
-          <button
-            type="submit"
-            style={{
-              marginTop: 8,
-              padding: '12px 24px',
-              background: '#111110',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: 'pointer',
-              width: '100%',
-            }}
-          >
-            Sign in
-          </button>
+          <LoginButton />
         </form>
       </div>
     </main>

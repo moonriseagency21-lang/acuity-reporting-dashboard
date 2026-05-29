@@ -19,30 +19,15 @@ export async function getLabelCounts(
   startDate: string,
   endDate: string
 ): Promise<Record<string, number>> {
+  const { data, error } = await supabase.rpc('get_label_counts', {
+    p_start: startDate,
+    p_end: endDate,
+  })
+  if (error) throw error
   const counts: Record<string, number> = {}
-  let from = 0
-  const PAGE = 1000
-
-  while (true) {
-    const { data, error } = await supabase
-      .from('vw_v2_labels')
-      .select('label_name')
-      .gte('appt_date', startDate)
-      .lte('appt_date', endDate)
-      .range(from, from + PAGE - 1)
-
-    if (error) throw error
-    if (!data || data.length === 0) break
-
-    for (const row of data) {
-      const name = row.label_name as string
-      counts[name] = (counts[name] ?? 0) + 1
-    }
-
-    if (data.length < PAGE) break
-    from += PAGE
+  for (const row of data as Array<{ label_name: string; cnt: number }>) {
+    counts[row.label_name] = Number(row.cnt)
   }
-
   return counts
 }
 
@@ -123,57 +108,34 @@ export async function getConversionMetrics(startDate: string, endDate: string) {
 }
 
 export async function getMonthlyMetrics(startDate: string, endDate: string): Promise<MonthMetric[]> {
-  const byMonth: Record<string, Record<string, number>> = {}
-  let from = 0
-  const PAGE = 1000
-
-  while (true) {
-    const { data, error } = await supabase
-      .from('vw_v2_labels')
-      .select('appt_date, label_name')
-      .gte('appt_date', startDate)
-      .lte('appt_date', endDate)
-      .range(from, from + PAGE - 1)
-
-    if (error) throw error
-    if (!data || data.length === 0) break
-
-    for (const row of data) {
-      const ym = (row.appt_date as string).slice(0, 7)
-      if (!byMonth[ym]) byMonth[ym] = {}
-      const label = row.label_name as string
-      byMonth[ym][label] = (byMonth[ym][label] ?? 0) + 1
-    }
-
-    if (data.length < PAGE) break
-    from += PAGE
-  }
-
-  return Object.keys(byMonth).sort().map(ym => {
-    const labels = byMonth[ym]
-    const total = Object.values(labels).reduce((s, n) => s + n, 0)
-    const noShow = labels['No SHOW'] ?? 0
-    const show = total - noShow
-    const sale = Object.entries(labels)
-      .filter(([name]) => name.startsWith('$ale'))
-      .reduce((s, [, n]) => s + n, 0)
-    let opportunity = 0, noOpportunity = 0
-    for (const [name, count] of Object.entries(labels)) {
-      if (OPPORTUNITY_LABELS.has(name)) opportunity += count
-      else if (NO_OPPORTUNITY_LABELS.has(name)) noOpportunity += count
-    }
-    const [yr, mo] = ym.split('-')
-    const showRate = total > 0 ? parseFloat(((opportunity / total) * 100).toFixed(1)) : 0
+  const { data, error } = await supabase.rpc('get_monthly_metrics', {
+    p_start: startDate,
+    p_end: endDate,
+  })
+  if (error) throw error
+  return (data as Array<{
+    year_month: string
+    total: number
+    no_show: number
+    show: number
+    opportunity: number
+    no_opportunity: number
+    sale: number
+  }>).map(row => {
+    const [yr, mo] = row.year_month.split('-')
+    const showRate = row.total > 0
+      ? parseFloat(((row.opportunity / row.total) * 100).toFixed(1))
+      : 0
     return {
       month: `${MONTH_ABBREVS[parseInt(mo) - 1]} ${yr}`,
-      yearMonth: ym,
-      total,
-      noShow,
-      show,
+      yearMonth: row.year_month,
+      total: Number(row.total),
+      noShow: Number(row.no_show),
+      show: Number(row.show),
       showRate,
-      opportunity,
-      noOpportunity,
-      sale,
+      opportunity: Number(row.opportunity),
+      noOpportunity: Number(row.no_opportunity),
+      sale: Number(row.sale),
     }
   })
 }
