@@ -26,8 +26,9 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
   const isLoginPage = request.nextUrl.pathname === '/login'
+  const isWebhook = request.nextUrl.pathname === '/api/acuity-webhook'
 
-  if (!user && !isLoginPage) {
+  if (!user && !isLoginPage && !isWebhook) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
