@@ -1,5 +1,7 @@
-import { supabase } from '@/lib/supabase'
+import { getServiceClient } from '@/lib/supabase-server'
 import { unstable_cache } from 'next/cache'
+
+const supabase = getServiceClient()
 import { OPPORTUNITY_LABELS, NO_OPPORTUNITY_LABELS, RESCHEDULE_LABELS } from '@/lib/labelBuckets'
 
 const MONTH_ABBREVS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']

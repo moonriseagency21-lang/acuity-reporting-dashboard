@@ -1,4 +1,6 @@
-import { supabase } from '@/lib/supabase'
+import { getServiceClient } from '@/lib/supabase-server'
+
+const supabase = getServiceClient()
 import { OPPORTUNITY_LABELS } from '@/lib/labelBuckets'
 import { OVERALL_SALES_RATE_GOAL, SHOW_RATE_GOAL, CLOSE_RATE_GOAL } from '@/lib/goals'
 
