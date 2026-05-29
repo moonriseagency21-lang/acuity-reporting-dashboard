@@ -1,7 +1,7 @@
 import { getServiceClient } from '@/lib/supabase-server'
 
 const supabase = getServiceClient()
-import { OPPORTUNITY_LABELS } from '@/lib/labelBuckets'
+import { OPPORTUNITY_LABELS, SALE_LABELS } from '@/lib/labelBuckets'
 import { OVERALL_SALES_RATE_GOAL, SHOW_RATE_GOAL, CLOSE_RATE_GOAL } from '@/lib/goals'
 
 export type FutureAppointment = {
@@ -70,55 +70,54 @@ export async function getFutureAppointments(): Promise<FutureAppointment[]> {
 
 // Returns all appointments today (historical table — has labels).
 export async function getTodayAppointments(): Promise<TodayAppointment[]> {
-  const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
-
-  const { data, error } = await supabase
-    .from('vw_v2_labels')
-    .select('appointment_id, datetime, first_name, last_name, calendar, appointment_type, label_name, canceled, no_show')
-    .gte('appt_date', todayStr)
-    .lte('appt_date', todayStr)
-    .order('datetime', { ascending: true })
-
+  const todayStr = new Date().toISOString().split('T')[0]
+  const { data, error } = await supabase.rpc('get_today_appointments', { p_date: todayStr })
   if (error) throw error
-
-  // vw_v2_labels has one row per label; deduplicate to one row per appointment
-  // keeping the most significant label (sale > opportunity > no-opp > blank).
-  const map = new Map<number, TodayAppointment>()
-  for (const row of (data ?? []) as Array<Record<string, unknown>>) {
-    const id = row.appointment_id as number
-    if (!map.has(id)) {
-      map.set(id, {
-        id,
-        datetime: row.datetime as string,
-        first_name: row.first_name as string | null,
-        last_name: row.last_name as string | null,
-        calendar: row.calendar as string | null,
-        appointment_type: row.appointment_type as string | null,
-        label_name: row.label_name as string | null,
-        canceled: row.canceled as boolean,
-        no_show: row.no_show as boolean,
-      })
-    }
-  }
-  return Array.from(map.values())
+  return ((data ?? []) as Array<{
+    appointment_id: number
+    datetime: string
+    first_name: string | null
+    last_name: string | null
+    calendar: string | null
+    appointment_type: string | null
+    label_name: string | null
+    canceled: boolean
+  }>).map(row => ({
+    id: row.appointment_id,
+    datetime: row.datetime,
+    first_name: row.first_name,
+    last_name: row.last_name,
+    calendar: row.calendar,
+    appointment_type: row.appointment_type,
+    label_name: row.label_name,
+    canceled: row.canceled,
+    no_show: row.label_name === 'No SHOW',
+  }))
 }
 
 // Returns future appointments for today only (unlabeled bookings not yet in historical table).
 export async function getTodayFutureAppointments(): Promise<FutureAppointment[]> {
-  const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
-
-  const { data, error } = await supabase
-    .from('future_appointments')
-    .select('id, datetime, first_name, last_name, calendar, appointment_type, labels, canceled')
-    .gte('datetime', todayStr + 'T00:00:00')
-    .lte('datetime', todayStr + 'T23:59:59')
-    .eq('canceled', false)
-    .order('datetime', { ascending: true })
-
+  const todayStr = new Date().toISOString().split('T')[0]
+  const { data, error } = await supabase.rpc('get_today_future_appointments', { p_date: todayStr })
   if (error) throw error
-  return (data ?? []) as FutureAppointment[]
+  return ((data ?? []) as Array<{
+    id: number
+    datetime: string
+    first_name: string | null
+    last_name: string | null
+    calendar: string | null
+    appointment_type: string | null
+    canceled: boolean
+  }>).map(row => ({
+    id: row.id,
+    datetime: row.datetime,
+    first_name: row.first_name,
+    last_name: row.last_name,
+    calendar: row.calendar,
+    appointment_type: row.appointment_type,
+    labels: null,
+    canceled: row.canceled,
+  }))
 }
 
 // Core pacing calculation — call server-side, pass result as props to PacingPanel.
@@ -202,5 +201,49 @@ export async function getPacingData(): Promise<PacingData> {
     daysRemaining,
     requiredCloseRateOnRemaining,
     onTrack,
+  }
+}
+
+export type TodayPacingData = {
+  occurredCount: number
+  futureCount: number
+  totalCount: number
+  showCount: number
+  showGoal: number
+  showsNeeded: number
+  saleCount: number
+  salesGoal: number
+  salesNeeded: number
+}
+
+export async function getTodayPacingData(): Promise<TodayPacingData> {
+  const { data, error } = await supabase.rpc('get_today_pacing')
+  if (error) throw error
+
+  const row = ((data ?? []) as Array<{
+    occurred_count: number
+    future_count: number
+    show_count: number
+    sale_count: number
+  }>)[0] ?? { occurred_count: 0, future_count: 0, show_count: 0, sale_count: 0 }
+
+  const occurredCount = Number(row.occurred_count)
+  const futureCount = Number(row.future_count)
+  const totalCount = occurredCount + futureCount
+  const showCount = Number(row.show_count)
+  const saleCount = Number(row.sale_count)
+  const showGoal = Math.round(totalCount * SHOW_RATE_GOAL)
+  const salesGoal = Math.round(totalCount * OVERALL_SALES_RATE_GOAL)
+
+  return {
+    occurredCount,
+    futureCount,
+    totalCount,
+    showCount,
+    showGoal,
+    showsNeeded: Math.max(0, showGoal - showCount),
+    saleCount,
+    salesGoal,
+    salesNeeded: Math.max(0, salesGoal - saleCount),
   }
 }

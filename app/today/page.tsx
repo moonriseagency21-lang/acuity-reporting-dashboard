@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic'
 
 import TodaysBoard from '@/components/TodaysBoard'
-import PacingPanel from '@/components/PacingPanel'
-import { getTodayAppointments, getTodayFutureAppointments, getPacingData } from '@/lib/queries/pacing'
+import TodayPacingPanel from '@/components/TodayPacingPanel'
+import { getTodayAppointments, getTodayFutureAppointments, getTodayPacingData } from '@/lib/queries/pacing'
 import { logout } from '@/app/login/actions'
 import Link from 'next/link'
 
@@ -11,20 +11,15 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-function todayLabel() {
-  const now = new Date()
-  return `${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`
-}
-
 export default async function TodayPage() {
+  const now = new Date()
+  const todayLabel = `${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`
+
   const [historical, future, pacing] = await Promise.all([
     getTodayAppointments().catch(() => []),
     getTodayFutureAppointments().catch(() => []),
-    getPacingData().catch(() => null),
+    getTodayPacingData().catch(() => null),
   ])
-  const now = new Date()
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
-  const currentMonthLabel = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`
 
   return (
     <main className="dashboard-page">
@@ -34,7 +29,7 @@ export default async function TodayPage() {
           <div className="dashboard-header-row">
             <div>
               <h1>Today&apos;s Board</h1>
-              <p>Good Vacation Getaways · {todayLabel()}</p>
+              <p>Good Vacation Getaways · {todayLabel}</p>
             </div>
             <div className="dashboard-controls">
               <Link
@@ -76,7 +71,7 @@ export default async function TodayPage() {
           </div>
         </header>
 
-        {pacing && <PacingPanel initial={pacing} monthLabel={currentMonthLabel} />}
+        {pacing && <TodayPacingPanel data={pacing} dateLabel={todayLabel} />}
         <TodaysBoard initialHistorical={historical} initialFuture={future} />
 
       </div>
