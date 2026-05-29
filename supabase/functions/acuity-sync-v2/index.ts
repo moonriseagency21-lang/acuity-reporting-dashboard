@@ -11,7 +11,7 @@ if (!ACUITY_USER_ID || !ACUITY_API_KEY) throw new Error("Missing Acuity env vars
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 type RequestBody = {
-  mode?: "daily" | "backfill" | "diagnose";
+  mode?: "daily" | "backfill" | "diagnose" | "today";
   startDate?: string;
   endDate?: string;
   dryRun?: boolean;
@@ -240,10 +240,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
         const r = await syncDateRange(wStart, wEnd, dryRun);
         results.push({ startDate: wStart, endDate: wEnd, ...r });
       }
+    } else if (mode === "today") {
+      const today = new Date().toISOString().split("T")[0];
+      const r = await syncDateRange(today, today, dryRun);
+      results.push({ startDate: today, endDate: today, ...r });
     }
 
     // Refresh pre-aggregated monthly metrics after any write mode
-    if ((mode === "daily" || mode === "backfill") && !dryRun) {
+    if ((mode === "daily" || mode === "backfill" || mode === "today") && !dryRun) {
       const { error: refreshErr } = await supabase.rpc("refresh_monthly_metrics");
       if (refreshErr) console.error("mv refresh failed:", refreshErr.message);
     }

@@ -57,3 +57,33 @@ select cron.schedule(
 
 -- To remove later:
 -- select cron.unschedule('acuity-future-sync');
+
+
+-- ─── Today's label sync (every 2 minutes) ────────────────────────────────────
+-- Pulls today's appointments from Acuity into acuity_appointments_v2 so labels
+-- applied by reps appear within 2 minutes even if a webhook is missed.
+-- Note: pg_cron minimum interval is 1 minute; we chain two offset jobs for ~2min.
+--
+-- Replace YOUR_SERVICE_ROLE_KEY with your key from Settings > API > Secret keys.
+
+select cron.unschedule('acuity-today-sync') where exists (
+  select 1 from cron.job where jobname = 'acuity-today-sync'
+);
+
+select cron.schedule(
+  'acuity-today-sync',
+  '*/2 * * * *',
+  $$
+  select net.http_post(
+    url     := 'https://ewgookyitoxxphfjfkcm.supabase.co/functions/v1/acuity-sync-v2',
+    headers := jsonb_build_object(
+      'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY',
+      'Content-Type',  'application/json'
+    ),
+    body    := '{"mode": "today"}'::jsonb
+  );
+  $$
+);
+
+-- To remove later:
+-- select cron.unschedule('acuity-today-sync');
