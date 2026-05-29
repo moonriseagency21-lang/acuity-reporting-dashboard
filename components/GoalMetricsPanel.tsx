@@ -14,7 +14,7 @@ type Row = {
 
 function MetricCell({ group }: { group: MetricGroup }) {
   const deltaColor =
-    group.delta === null ? '#6b6b6b' : group.delta >= 0 ? '#2d7d46' : '#c0392b'
+    group.delta === null ? '#636466' : group.delta >= 0 ? '#00C9A7' : '#FF6F61'
   const deltaText =
     group.delta === null
       ? '—'

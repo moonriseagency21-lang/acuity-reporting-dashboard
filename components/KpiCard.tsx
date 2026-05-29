@@ -10,15 +10,18 @@ export default function KpiCard({ title, value, subtitle, rate }: KpiCardProps) 
     <div
       style={{
         background: '#ffffff',
-        border: '1px solid #e5e5e5',
+        border: '1px solid #e0e0e0',
         borderRadius: '18px',
         padding: '24px',
       }}
     >
       <div
         style={{
-          color: '#6b6b6b',
-          fontSize: '14px',
+          color: '#636466',
+          fontSize: '13px',
+          fontWeight: 500,
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
           marginBottom: '10px',
         }}
       >
@@ -27,9 +30,9 @@ export default function KpiCard({ title, value, subtitle, rate }: KpiCardProps) 
 
       <div
         style={{
-          color: '#111110',
+          color: '#333333',
           fontSize: '36px',
-          fontWeight: 700,
+          fontWeight: 900,
           lineHeight: 1,
         }}
       >
@@ -37,7 +40,7 @@ export default function KpiCard({ title, value, subtitle, rate }: KpiCardProps) 
       </div>
 
       {rate ? (
-        <div style={{ marginTop: '8px', fontSize: '18px', fontWeight: 600, color: '#374151' }}>
+        <div style={{ marginTop: '8px', fontSize: '18px', fontWeight: 600, color: '#0047AB' }}>
           {rate}%
         </div>
       ) : null}
@@ -45,8 +48,8 @@ export default function KpiCard({ title, value, subtitle, rate }: KpiCardProps) 
         <div
           style={{
             marginTop: '10px',
-            color: '#6b6b6b',
-            fontSize: '14px',
+            color: '#636466',
+            fontSize: '13px',
           }}
         >
           {subtitle}

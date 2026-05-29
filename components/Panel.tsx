@@ -8,7 +8,7 @@ export default function Panel({ title, children }: Props) {
     <section
       style={{
         background: '#ffffff',
-        border: '1px solid #e5e5e5',
+        border: '1px solid #e0e0e0',
         borderRadius: '18px',
         padding: '24px',
       }}
@@ -16,9 +16,11 @@ export default function Panel({ title, children }: Props) {
       <div
         style={{
           marginBottom: '16px',
-          color: '#111110',
-          fontSize: '20px',
+          color: '#333333',
+          fontSize: '16px',
           fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
         }}
       >
         {title}

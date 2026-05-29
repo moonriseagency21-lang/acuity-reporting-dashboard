@@ -2,8 +2,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #f6f6f6;
-  color: #111110;
+  background: #F8F8F8;
+  color: #333333;
   font-family: Inter, Arial, sans-serif;
 }
 
@@ -13,8 +13,8 @@ body {
 
 .dashboard-page {
   min-height: 100vh;
-  background: #f6f6f6;
-  color: #111110;
+  background: #F8F8F8;
+  color: #333333;
 }
 
 .dashboard-shell {
@@ -23,8 +23,11 @@ body {
   padding: 32px;
 }
 
+/* Option A: white header with Cobalt Blue bottom accent */
 .dashboard-header {
   margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 3px solid #0047AB;
 }
 
 .dashboard-header-row {
@@ -38,13 +41,14 @@ body {
 .dashboard-header h1 {
   margin: 0 0 6px;
   font-size: 40px;
+  font-weight: 900;
   line-height: 1.05;
-  color: #111110;
+  color: #333333;
 }
 
 .dashboard-header p {
   margin: 0;
-  color: #666666;
+  color: #636466;
   font-size: 16px;
 }
 
@@ -103,7 +107,7 @@ body {
   justify-content: space-between;
   gap: 16px;
   padding: 10px 0;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .stat-row:last-child {
@@ -111,17 +115,17 @@ body {
 }
 
 .stat-label {
-  color: #666666;
+  color: #636466;
 }
 
 .stat-value {
-  color: #111110;
+  color: #333333;
   font-weight: 600;
 }
 
 .goal-banner {
   background: #ffffff;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e0e0e0;
   border-radius: 18px;
   padding: 20px 28px;
   display: flex;
@@ -130,7 +134,7 @@ body {
 }
 
 .goal-label {
-  color: #6b6b6b;
+  color: #636466;
   font-size: 14px;
   font-weight: 500;
 }
@@ -138,7 +142,7 @@ body {
 .goal-value {
   font-size: 28px;
   font-weight: 700;
-  color: #111110;
+  color: #333333;
 }
 
 .goal-current {
@@ -195,5 +199,5 @@ body {
 }
 
 .label-row-link:hover {
-  background: #f3f4f6;
+  background: #F4E4C1;
 }
