@@ -28,3 +28,32 @@ select cron.schedule(
 
 -- To remove later:
 -- select cron.unschedule('acuity-nightly-sync');
+
+
+-- ─── Future appointments sync (every 15 minutes) ──────────────────────────────
+-- Pulls today → end of month from Acuity into future_appointments.
+-- Realtime subscription in the dashboard picks up changes instantly.
+--
+-- Replace YOUR_SERVICE_ROLE_KEY with your key from Settings > API > Secret keys.
+
+select cron.unschedule('acuity-future-sync') where exists (
+  select 1 from cron.job where jobname = 'acuity-future-sync'
+);
+
+select cron.schedule(
+  'acuity-future-sync',
+  '*/15 * * * *',
+  $$
+  select net.http_post(
+    url     := 'https://ewgookyitoxxphfjfkcm.supabase.co/functions/v1/acuity-future-sync',
+    headers := jsonb_build_object(
+      'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY',
+      'Content-Type',  'application/json'
+    ),
+    body    := '{}'::jsonb
+  );
+  $$
+);
+
+-- To remove later:
+-- select cron.unschedule('acuity-future-sync');

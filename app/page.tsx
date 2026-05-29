@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import KpiCard from '@/components/KpiCard'
 import Panel from '@/components/Panel'
 import BucketBarChart from '@/components/BucketBarChart'
@@ -5,8 +7,11 @@ import LabelCountsPanel from '@/components/LabelCountsPanel'
 import DateRangePicker from '@/components/DateRangePicker'
 import MomBarChart from '@/components/MomBarChart'
 import GoalMetricsPanel from '@/components/GoalMetricsPanel'
+import PacingPanel from '@/components/PacingPanel'
 import { getConversionMetrics, getMonthlyMetrics } from '@/lib/queries/dashboard'
+import { getPacingData } from '@/lib/queries/pacing'
 import { logout } from '@/app/login/actions'
+import Link from 'next/link'
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -50,10 +55,14 @@ export default async function HomePage({
   const startDate = params.startDate ?? defaults.startDate
   const endDate = params.endDate ?? defaults.endDate
 
-  const [conversion, monthlyMetrics] = await Promise.all([
+  const [conversion, monthlyMetrics, pacing] = await Promise.all([
     getConversionMetrics(startDate, endDate),
     getMonthlyMetrics('2024-01-01', '2026-12-31'),
+    getPacingData().catch(() => null),
   ])
+
+  const now = new Date()
+  const currentMonthLabel = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`
   const rangeLabel = formatRangeLabel(startDate, endDate)
 
   return (
@@ -68,6 +77,23 @@ export default async function HomePage({
             </div>
             <div className="dashboard-controls">
               <DateRangePicker startDate={startDate} endDate={endDate} />
+              <Link
+                href="/today"
+                style={{
+                  padding: '8px 18px',
+                  background: '#0047AB',
+                  border: '1px solid #0047AB',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  textDecoration: 'none',
+                }}
+              >
+                Today&apos;s Board →
+              </Link>
               <form action={logout}>
                 <button
                   type="submit"
@@ -131,6 +157,8 @@ export default async function HomePage({
             subtitle={`Sales ÷ ${conversion.opportunityCount.toLocaleString()} opportunity`}
           />
         </section>
+
+        {pacing && <PacingPanel initial={pacing} monthLabel={currentMonthLabel} />}
 
         <GoalMetricsPanel
           opportunityRate={conversion.opportunityRate ?? null}
