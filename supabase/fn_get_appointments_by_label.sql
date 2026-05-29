@@ -41,9 +41,9 @@ AS $$
     paid::text
   FROM acuity_appointments_v2
   WHERE
-    -- Use the raw datetime index by converting boundaries to timestamptz
-    datetime::timestamptz >= (p_start::text || 'T00:00:00')::timestamptz AT TIME ZONE 'America/New_York'
-    AND datetime::timestamptz <  ((p_end + 1)::text || 'T00:00:00')::timestamptz AT TIME ZONE 'America/New_York'
+    -- Convert date boundaries to timestamptz so the datetime index can be used
+    datetime >= p_start::timestamp AT TIME ZONE 'America/New_York'
+    AND datetime <  (p_end::timestamp + interval '1 day') AT TIME ZONE 'America/New_York'
     AND (
       CASE
         WHEN p_label = '(blank)' THEN
