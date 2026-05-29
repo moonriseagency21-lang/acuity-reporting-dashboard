@@ -134,7 +134,7 @@ export default async function AppointmentsPage({
               </tr>
             </thead>
             <tbody>
-              {appointments.map((appt, i) => (
+              {appointments.map((appt: Record<string, unknown>, i: number) => (
                 <tr
                   key={appt.appointment_id}
                   style={{
